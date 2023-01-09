@@ -5,7 +5,7 @@ This is a simpe C++ interface over for GSS API (Generic Security Services API)
 
 ## Service part example
 
-```
+```cpp
 #include <sstream>
 #include <cstring>
 #include <iomanip>
