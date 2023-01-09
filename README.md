@@ -107,51 +107,6 @@ public:
         return 0;
     }
 };
-
-int main(int argc, char **argv)
-{
-    int res = 0;
-    int port = 44444;
-    std::string service = "test";
-
-    for(int it = 1; it < argc; ++it)
-    {
-        if(0 == std::strcmp(argv[it], "--port") && it + 1 < argc)
-        {
-            try
-            {
-                port = std::stoi(argv[it + 1]);
-            }
-            catch(const std::invalid_argument &)
-            {
-                std::cerr << "incorrect port number" << std::endl;
-            }
-            it = it + 1;
-        }
-        else
-        if(0 == std::strcmp(argv[it], "--service") && it + 1 < argc)
-        {
-            service.assign(argv[it + 1]);
-            it = it + 1;
-        }
-        else
-        {
-            std::cout << "usage: " << argv[0] << " --port 44444" << " --service <name>" << std::endl;
-            return 0;
-        }
-    }
-
-    try
-    {
-        res = GssApiServer(port, service).start();
-    }
-    catch(const std::exception & err)
-    {
-        std::cerr << "exception: " << err.what() << std::endl;
-    }
-
-    return res;
-}
 ```  
 
 API Documentation:
