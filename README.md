@@ -3,6 +3,9 @@ This is a simpe C++ interface over for GSS API (Generic Security Services API)
 
 ![structure](https://github.com/AndreyBarmaley/gssapi-layer-cpp/blob/main/classes.png)
 
+API Documentation:
+https://andreybarmaley.github.io/gssapi-layer-cpp/html/annotated.html
+
 ## Service part example
 
 ```cpp
@@ -96,5 +99,5 @@ public:
 };
 ```  
 
-API Documentation:
-https://andreybarmaley.github.io/gssapi-layer-cpp/html/annotated.html
+## Client part example
+[test examples](https://github.com/AndreyBarmaley/gssapi-layer-cpp/blob/main/test)
