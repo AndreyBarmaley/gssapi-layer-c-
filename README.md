@@ -14,19 +14,6 @@ This is a simpe C++ interface over for GSS API (Generic Security Services API)
 #include "gsslayer.h"
 #include "tools.h"
 
-std::string buffer2hexstring(const uint8_t* data, size_t length, std::string_view sep = ",", bool prefix = true)
-{
-    std::ostringstream os;
-    for(size_t it = 0; it != length; ++it)
-    {
-       if(prefix)
-           os << "0x";
-       os << std::setw(2) << std::setfill('0') << std::uppercase << std::hex << static_cast<int>(data[it]);
-       if(sep.size() && it + 1 != length) os << sep;
-    }
-    return os.str();
-}
-
 class GssApiServer : public Gss::ServiceContext
 {
     int port = 0;
