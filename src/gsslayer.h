@@ -88,6 +88,8 @@ namespace Gss
         gss_OID mech_types = nullptr;
         gss_ctx_id_t context_handle = nullptr;
         gss_name_t src_name = nullptr;
+        gss_name_t service_name = nullptr;
+        gss_cred_id_t creds = nullptr;
         OM_uint32 support_flags = 0;
         OM_uint32 time_rec = 0;
 
@@ -103,15 +105,17 @@ namespace Gss
         virtual void error(const char* func, const char* subfunc, OM_uint32 code1, OM_uint32 code2) const;
 
         std::vector<uint8_t>    recvMessage(void);
-        bool                    sendMessage(const std::vector<uint8_t> &, bool encrypt = true);
+        bool                    sendMessage(const void*, size_t, bool encrypt = true);
 
-        bool                    recvMIC(const std::vector<uint8_t> &);
-        bool                    sendMIC(const std::vector<uint8_t> &);
+        bool                    recvMIC(const void*, size_t);
+        bool                    sendMIC(const void*, size_t);
 
         const gss_name_t &      srcName(void) const { return src_name; }
         const gss_OID &         mechTypes(void) const { return mech_types; }
         const OM_uint32 &       supportFlags(void) const { return support_flags; }
         const OM_uint32 &       timeRec(void) const { return time_rec; }
+
+        bool acquireCredential(std::string_view, const NameType &, const CredentialUsage & = Gss::CredentialUsage::Accept);
 
         std::list<std::string> mechNames(void) const;
     };
@@ -119,14 +123,9 @@ namespace Gss
     /// ServiceContext
     class ServiceContext : public Context
     {
-        gss_cred_id_t creds = nullptr;
-        gss_name_t service_name = nullptr;
-
     public:
         ServiceContext() = default;
-        ~ServiceContext();
 
-        bool acquireCredential(std::string_view, const NameType &, const CredentialUsage & = Gss::CredentialUsage::Accept);
         bool acceptClient(void);
     };
 

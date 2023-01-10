@@ -42,15 +42,10 @@ std::string buffer2hexstring(const uint8_t* data, size_t length, std::string_vie
 
 class GssApiServer : public Gss::ServiceContext
 {
-    int port = 0;
     int sock = 0;
-    std::string service;
 
 public:
-    GssApiServer(int port2, const std::string & service2)
-        : port(port2), service(service2)
-    {
-    }
+    GssApiServer() = default;
 
     // ServiceContext override
     std::vector<uint8_t> recvToken(void) override
@@ -74,7 +69,7 @@ public:
         std::cerr << func << ": " << subfunc << " failed, " << Gss::error2str(code1, code2) << std::endl;
     }
 
-    int start(void)
+    int start(int port, std::string_view service)
     {
         std::cout << "service id: " << service.data() << std::endl;
 
@@ -114,7 +109,7 @@ public:
         auto buf = recvMessage();
         std::cout << "recv data: " << buffer2hexstring(buf.data(), buf.size()) << std::endl;
 
-        auto res = sendMIC(buf);
+        auto res = sendMIC(buf.data(), buf.size());
         std::cout << "send mic: " << (res ? "success" : "failed") << std::endl;
 
         return 0;
@@ -125,7 +120,7 @@ int main(int argc, char **argv)
 {
     int res = 0;
     int port = 44444;
-    std::string service = "test";
+    std::string service = "TestService";
 
     for(int it = 1; it < argc; ++it)
     {
@@ -149,14 +144,14 @@ int main(int argc, char **argv)
         }
         else
         {
-            std::cout << "usage: " << argv[0] << " --port 44444" << " --service <name>" << std::endl;
+            std::cout << "usage: " << argv[0] << " --port 44444" << " --service <" << service << ">" << std::endl;
             return 0;
         }
     }
 
     try
     {
-        res = GssApiServer(port, service).start();
+        res = GssApiServer().start(port, service);
     }
     catch(const std::exception & err)
     {

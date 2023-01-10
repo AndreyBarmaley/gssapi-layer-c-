@@ -101,3 +101,12 @@ public:
 
 ## Client part example
 [test examples](https://github.com/AndreyBarmaley/gssapi-layer-cpp/blob/main/test)
+
+## Usage
+```
+KRB5_KTNAME=/var/tmp/krb5.keytab ./server --service ServiceName
+```
+```
+./client --ipaddr 192.168.100.1 --service ServiceName@servername
+
+```

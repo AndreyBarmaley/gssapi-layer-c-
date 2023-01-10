@@ -160,16 +160,28 @@ namespace Gss
     // Context
     Context::~Context()
     {
-        if(src_name)
+        if(creds)
         {
             OM_uint32 stat = 0;
-            gss_release_name(& stat, & src_name);
+            gss_release_cred(& stat, & creds);
         }
 
         if(context_handle)
         {
             OM_uint32 stat = 0;
             gss_delete_sec_context(& stat, & context_handle, GSS_C_NO_BUFFER);
+        }
+
+        if(src_name)
+        {
+            OM_uint32 stat = 0;
+            gss_release_name(& stat, & src_name);
+        }
+
+        if(service_name)
+        {
+            OM_uint32 stat = 0;
+            gss_release_name(& stat, & service_name);
         }
     }
 
@@ -203,11 +215,11 @@ namespace Gss
         return res;
     }
 
-    bool Context::sendMessage(const std::vector<uint8_t> & buf, bool encrypt)
+    bool Context::sendMessage(const void* buf, size_t len, bool encrypt)
     {
         OM_uint32 stat;
 
-        gss_buffer_desc in_buf{ buf.size(), (void*) buf.data() };
+        gss_buffer_desc in_buf{ len, (void*) buf };
         gss_buffer_desc out_buf{ 0, nullptr, };
 
         auto ret = gss_wrap(& stat, context_handle, encrypt, GSS_C_QOP_DEFAULT, & in_buf, nullptr, & out_buf);
@@ -227,14 +239,14 @@ namespace Gss
         return res;
     }
 
-    bool Context::recvMIC(const std::vector<uint8_t> & msg)
+    bool Context::recvMIC(const void* msg, size_t msgsz)
     {
         OM_uint32 stat;
 
         // recv token
         auto buf = recvToken();
 
-        gss_buffer_desc in_buf{ msg.size(), (void*) msg.data() };
+        gss_buffer_desc in_buf{ msgsz, (void*) msg };
         gss_buffer_desc out_buf{ buf.size(), (void*) buf.data() };
 
         auto ret = gss_verify_mic(& stat, context_handle, & in_buf, & out_buf, nullptr);
@@ -246,11 +258,11 @@ namespace Gss
         return false;
     }
 
-    bool Context::sendMIC(const std::vector<uint8_t> & msg)
+    bool Context::sendMIC(const void* msg, size_t msgsz)
     {
         OM_uint32 stat;
 
-        gss_buffer_desc in_buf{ msg.size(), (void*) msg.data() };
+        gss_buffer_desc in_buf{ msgsz, (void*) msg };
         gss_buffer_desc out_buf{ 0, nullptr };
 
         auto ret = gss_get_mic(& stat, context_handle, GSS_C_QOP_DEFAULT, & in_buf, & out_buf);
@@ -304,23 +316,7 @@ namespace Gss
         return res;
     }
 
-    // ServiceContext
-    ServiceContext::~ServiceContext()
-    {
-        if(service_name)
-        {
-            OM_uint32 stat = 0;
-            gss_release_name(& stat, & service_name);
-        }
-
-        if(creds)
-        {
-            OM_uint32 stat = 0;
-            gss_release_cred(& stat, & creds);
-        }
-    }
-
-    bool ServiceContext::acquireCredential(std::string_view name, const NameType & type, const CredentialUsage & usage)
+    bool Context::acquireCredential(std::string_view name, const NameType & type, const CredentialUsage & usage)
     {
         OM_uint32 stat;
 
@@ -344,10 +340,14 @@ namespace Gss
         if(ret == GSS_S_COMPLETE)
             return true;
 
+        if(ret == GSS_S_NO_CRED)
+            return false;
+
         error(__FUNCTION__, "gss_acquire_cred", ret, stat);
         return false;
     }
 
+    // ServiceContext
     bool ServiceContext::acceptClient(void)
     {
         if(! creds)
@@ -370,7 +370,7 @@ namespace Gss
             gss_buffer_desc recv_tok{ buf.size(), (void*) buf.data() };
             gss_buffer_desc send_tok{ 0, nullptr };
 
-            ret = gss_accept_sec_context(& stat, & context_handle, creds, & recv_tok, GSS_C_NO_CHANNEL_BINDINGS,
+            ret = gss_accept_sec_context(& stat, & context_handle, creds ? creds : GSS_C_NO_CREDENTIAL, & recv_tok, GSS_C_NO_CHANNEL_BINDINGS,
                                      & src_name, & mech_types, & send_tok, & support_flags, & time_rec, nullptr);
 
             if(0 < send_tok.length)
@@ -416,7 +416,7 @@ namespace Gss
         OM_uint32 ret = GSS_S_CONTINUE_NEEDED;
         while(ret == GSS_S_CONTINUE_NEEDED)
         {
-            ret = gss_init_sec_context(& stat, GSS_C_NO_CREDENTIAL, & context_handle, src_name, GSS_C_NULL_OID, flags,
+            ret = gss_init_sec_context(& stat, creds ? creds : GSS_C_NO_CREDENTIAL, & context_handle, src_name, GSS_C_NULL_OID, flags,
                                     0, input_chan_bindings, & recv_tok, & mech_types, & send_tok, & support_flags, & time_rec);
 
             if(0 < send_tok.length)

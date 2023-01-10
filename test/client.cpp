@@ -27,18 +27,10 @@
 
 class GssApiClient : public Gss::ClientContext
 {
-    std::vector<uint8_t> buf;
-    std::string service;
-    std::string ipaddr;
-    int port = 0;
     int sock = 0;
 
 public:
-    GssApiClient(const std::string & ipaddr2, int port2, const std::string & service2, std::string_view msg)
-        : service(service2), ipaddr(ipaddr2), port(port2)
-    {
-        buf.assign((uint8_t*) msg.data(), (uint8_t*) msg.data() + msg.size());
-    }
+    GssApiClient() = default;
 
     // ServiceContext override
     std::vector<uint8_t> recvToken(void) override
@@ -62,14 +54,22 @@ public:
         std::cerr << func << ": " << subfunc << " failed, " << Gss::error2str(code1, code2) << std::endl;
     }
 
-    int start(void)
+    int start(std::string_view ipaddr, int port, std::string_view service, bool mutual, const std::vector<char> & buf)
     {
         std::cout << "service id: " << service.data() << std::endl;
+
+        int flag = GSS_C_REPLAY_FLAG;
+
+        if(mutual)
+            flag |= GSS_C_MUTUAL_FLAG;
+
+        //if(! acquireCredential("username", Gss::NameType::NtUserName, Gss::CredentialUsage::Initiate))
+        //    return -1;
 
         sock = TCPSocket::connect(ipaddr, port);
         std::cout << "sock fd: " << sock << std::endl;
 
-        if(! initConnect(service, Gss::NameType::NtHostService))
+        if(! initConnect(service, Gss::NameType::NtHostService, flag))
             return -1;
 
         // client info
@@ -93,10 +93,10 @@ public:
             std::cout << "supported flag: " << flagName(f) << std::endl;
         }
 
-        bool res = sendMessage(buf, true /* encrypt */);
+        bool res = sendMessage(buf.data(), buf.size(), true /* encrypt */);
         std::cout << "send data: " << (res ? "success" : "failed") << std::endl;
 
-        res = recvMIC(buf);
+        res = recvMIC(buf.data(), buf.size());
         std::cout << "recv mic: " << (res ? "verified" : "failed") << std::endl;
 
         return 0;
@@ -108,8 +108,9 @@ int main(int argc, char **argv)
     int res = 0;
     int port = 44444;
     std::string ipaddr = "127.0.0.1";
-    std::string msg = "1234567890";
-    std::string service = "test";
+    std::vector<char> msg { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
+    std::string service = "TestService";
+    bool mutual = false;
 
     for(int it = 1; it < argc; ++it)
     {
@@ -134,7 +135,9 @@ int main(int argc, char **argv)
         else
         if(0 == std::strcmp(argv[it], "--message") && it + 1 < argc)
         {
-            msg.assign(argv[it + 1]);
+            auto beg = argv[it + 1];
+            auto len = strlen(beg);
+            msg.assign(beg, beg + len);
             it = it + 1;
         }
         else
@@ -144,15 +147,20 @@ int main(int argc, char **argv)
             it = it + 1;
         }
         else
+        if(0 == std::strcmp(argv[it], "--mutual"))
         {
-            std::cout << "usage: " << argv[0] << " --ipaddr 127.0.0.1" << " --port 44444" << " --service <name>" << " --message 1234567890" << std::endl;
+            mutual = true;
+        }
+        else
+        {
+            std::cout << "usage: " << argv[0] << " --ipaddr 127.0.0.1" << " --port 44444" << " --service <" << service << ">" << " [--mutual]" << " --message 1234567890" << std::endl;
             return 0;
         }
     }
 
     try
     {
-        res = GssApiClient(ipaddr, port, service, msg).start();
+        res = GssApiClient().start(ipaddr, port, service, mutual, msg);
     }
     catch(const std::exception & err)
     {
