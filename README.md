@@ -100,6 +100,32 @@ public:
 ## Usage
 ```
 KRB5_KTNAME=/var/tmp/krb5.keytab ./server --service ServiceName
+
+service id: ServiceName
+bind addr: any, port: 44444
+srv fd: 5
+sock fd: 6
+token recv: 627
+client id: username@EXAMPLE.COM
+mechanism { 1 2 840 113554 1 2 2 } supports 9 names
+ - mech name: { 1 2 840 113554 1 2 2 2 }
+ - mech name: { 1 3 6 1 5 6 6 }
+ - mech name: { 1 2 840 113554 1 2 2 1 }
+ - mech name: { 1 3 6 1 5 6 4 }
+ - mech name: { 1 3 6 1 5 6 2 }
+ - mech name: { 1 2 840 113554 1 2 1 4 }
+ - mech name: { 1 2 840 113554 1 2 1 3 }
+ - mech name: { 1 2 840 113554 1 2 1 2 }
+ - mech name: { 1 2 840 113554 1 2 1 1 }
+supported flag: transfer
+supported flag: integrity
+supported flag: confidential
+supported flag: replay
+token recv: 70
+recv data: 0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x30
+token send: 28
+send mic: success
+
 ```
 ```
 ./client --ipaddr 192.168.100.1 --service ServiceName@servername
