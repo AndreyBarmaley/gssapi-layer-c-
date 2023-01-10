@@ -104,4 +104,26 @@ KRB5_KTNAME=/var/tmp/krb5.keytab ./server --service ServiceName
 ```
 ./client --ipaddr 192.168.100.1 --service ServiceName@servername
 
+service id: ServiceName@servername
+connect to addr: 192.168.100.1, port: 44444
+sock fd: 3
+token send: 627
+mechanism { 1 2 840 113554 1 2 2 } supports 9 names
+ - mech name: { 1 2 840 113554 1 2 2 2 }
+ - mech name: { 1 3 6 1 5 6 6 }
+ - mech name: { 1 2 840 113554 1 2 2 1 }
+ - mech name: { 1 3 6 1 5 6 4 }
+ - mech name: { 1 3 6 1 5 6 2 }
+ - mech name: { 1 2 840 113554 1 2 1 4 }
+ - mech name: { 1 2 840 113554 1 2 1 3 }
+ - mech name: { 1 2 840 113554 1 2 1 2 }
+ - mech name: { 1 2 840 113554 1 2 1 1 }
+supported flag: transfer
+supported flag: integrity
+supported flag: confidential
+supported flag: replay
+token send: 70
+send data: success
+token recv: 28
+recv mic: verified
 ```
