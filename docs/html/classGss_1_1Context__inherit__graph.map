@@ -1,5 +1,5 @@
 <map id="Gss::Context" name="Gss::Context">
-<area shape="rect" id="node1" title="BaseContext." alt="" coords="96,5,233,361"/>
-<area shape="rect" id="node2" href="$classGss_1_1ClientContext.html" title="ClientContext." alt="" coords="5,424,148,516"/>
-<area shape="rect" id="node3" href="$classGss_1_1ServiceContext.html" title="ServiceContext." alt="" coords="173,409,335,531"/>
+<area shape="rect" id="node1" title="BaseContext." alt="" coords="81,5,243,405"/>
+<area shape="rect" id="node2" href="$classGss_1_1ClientContext.html" title="ClientContext." alt="" coords="5,453,148,545"/>
+<area shape="rect" id="node3" href="$classGss_1_1ServiceContext.html" title="ServiceContext." alt="" coords="172,453,325,545"/>
 </map>
