@@ -19,15 +19,10 @@ https://andreybarmaley.github.io/gssapi-layer-cpp/html/annotated.html
 
 class GssApiServer : public Gss::ServiceContext
 {
-    int port = 0;
     int sock = 0;
-    std::string service;
 
 public:
-    GssApiServer(int port2, const std::string & service2)
-        : port(port2), service(service2)
-    {
-    }
+    GssApiServer() = default;
 
     // ServiceContext override
     std::vector<uint8_t> recvToken(void) override
@@ -51,7 +46,7 @@ public:
         std::cerr << func << ": " << subfunc << " failed, " << Gss::error2str(code1, code2) << std::endl;
     }
 
-    int start(void)
+    int start(int port, std::string_view service)
     {
         std::cout << "service id: " << service.data() << std::endl;
 
@@ -91,7 +86,7 @@ public:
         auto buf = recvMessage();
         std::cout << "recv data: " << buffer2hexstring(buf.data(), buf.size()) << std::endl;
 
-        auto res = sendMIC(buf);
+        auto res = sendMIC(buf.data(), buf.size());
         std::cout << "send mic: " << (res ? "success" : "failed") << std::endl;
 
         return 0;
