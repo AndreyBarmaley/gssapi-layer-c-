@@ -100,7 +100,9 @@ public:
 ## Usage
 ```
 KRB5_KTNAME=/var/tmp/krb5.keytab ./server --service ServiceName
-
+```
+output:
+```
 service id: ServiceName
 bind addr: any, port: 44444
 srv fd: 5
@@ -129,7 +131,9 @@ send mic: success
 ```
 ```
 ./client --ipaddr 192.168.100.1 --service ServiceName@servername
-
+```
+output:
+```
 service id: ServiceName@servername
 connect to addr: 192.168.100.1, port: 44444
 sock fd: 3
